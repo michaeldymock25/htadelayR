@@ -7,9 +7,8 @@ Authors@R:
              email = "michael.dymock1@hotmail.com",
              role = c("aut", "cre"),
              comment = c(ORCID = "0000-0003-4881-2860")),
-      person(given = "Stephen", 
+      person(given = c("Stephen", "E."), 
              family = "Chick", 
-             middle = "E.", 
              role = c("aut")))
 Description: The code computes optimal stopping times for sequential experiments when samples are observed with delay.
 Encoding: UTF-8
