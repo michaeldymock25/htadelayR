@@ -63,7 +63,6 @@ DelayInputConstructor <- function(basicarray = list(), advancedarray = list()){
                      # create an instance of the object with the right hyperparameters
                      # advanced$Distribution = advanced.DistributionType(basic$mu0, basic$t0, basic$sigma, xi0)
                    mushift = 0,
-                   NumGridsForContours = 50, # number of time points to include for time axis in contour plots
                    MinGridPerStdev = 30,     # minimum number of delta-mus per standard deviation
                    dt = NA,                  # delta t for the recursion: set to NA if it should be computed from dmu
                    fixedP = TRUE,            # set to true if expected reward on stopping is for P * expected reward per patient, false if
@@ -95,12 +94,15 @@ DelayInputConstructor <- function(basicarray = list(), advancedarray = list()){
   # mushift as those are selected for internal consistency purposes.
 
   modified <- DelayInputModifier(basic = basic, advanced = advanced, basicarray = basicarray, advancedarray = advancedarray)
+  rval <- modified$rval
+  basic <- modified$basic
+  advanced <- modified$advanced
 
   # COMPUTED PARAMETERS: If more are put here, please fix the code to insure
   # that they don't overwrite parameter values which may have been entered by
   # the end user.
 
-  if(!modified$rval){
+  if(!rval){
     return(list(basic = list(), advanced = list()))
   } else {
     if(advanced$UnkVariance){
@@ -110,16 +112,16 @@ DelayInputConstructor <- function(basicarray = list(), advancedarray = list()){
       } else {
         tmpxi <- (advanced$UnkVarianceShape - 1)/2 # use if the prior is otherwise specified
       }
-        fudgefactor <- sqrt((2*tmpxi)/(2*tmpxi - 2))
-      } else {
-        fudgefactor <- 1
-      }
-      # the increment used for the grid for the posterior mean
-      if("dmu" %in% names(advanced)) advanced$dmu <- fudgefactor*basic$sigma/advanced$MinGridPerStdev
-      # the upper value to be included in the grid for the posterior mean
-      if("mumax" %in% names(basic)) basic$mumax <- 15*basic$sigma/sqrt(basic$t0)
-      # the lower value to be included in the grid for the posterior mean
-      if("mumin" %in% names(basic)) basic$mumin <- -basic$mumax
-    return(list(basic = modified$basic, advanced = modified$advanced))
+      fudgefactor <- sqrt((2*tmpxi)/(2*tmpxi - 2))
+    } else {
+      fudgefactor <- 1
+    }
+    # the increment used for the grid for the posterior mean
+    if("dmu" %in% names(advanced)) advanced$dmu <- fudgefactor*basic$sigma/advanced$MinGridPerStdev
+    # the upper value to be included in the grid for the posterior mean
+    if("mumax" %in% names(basic)) basic$mumax <- 15*basic$sigma/sqrt(basic$t0)
+    # the lower value to be included in the grid for the posterior mean
+    if("mumin" %in% names(basic)) basic$mumin <- -basic$mumax
+    return(list(basic = basic, advanced = advanced))
   }
 }

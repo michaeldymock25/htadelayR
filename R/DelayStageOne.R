@@ -14,7 +14,7 @@ DelayStageOne <- function(basic, advanced, mat){
     # STEP 1: Initialize variables
   ######################################################
 
-  muvec <- t(mat$muvec)
+  muvec <- mat$muvec
   sigma <- basic$sigma
   t0 <- basic$t0
   theta <- basic$theta
@@ -94,7 +94,7 @@ DelayStageOne <- function(basic, advanced, mat){
         # compute expected regret of a decision, assuming one may have option to continue sampling. This would be the expected value of perfect
         # information, given the information state at the time of stopping, assuming one can continue
         RewardI <- TerminalRegretUnk(muvec*PPatientvec[i] - ICost, discountvector[i]^(1 - advanced$nochangeallowed),
-                                     predvarvec[i], postvar, advanced2, dof)
+                                     predvarvec[i], postvar, advanced2, dof)$ereward
       } else {
         G0base[,i] <- TerminalRewardFunction(muvec*PPatientvec[i] - ICost, discountvector[i], predvarvec[i], FALSE)
         # compute expected regret of a decision, assuming one may have option to continue sampling. This would be the expected value of perfect
@@ -102,8 +102,7 @@ DelayStageOne <- function(basic, advanced, mat){
         RewardI <- TerminalRegret(muvec*PPatientvec[i] - ICost, discountvector[i]^(1 - advanced$nochangeallowed),
                                   predvarvec[i], postvar, advanced2)$ereward
       }
-      Regretcontin <- RewardPIT0I - RewardI
-      G0base[,i] <- G0base[,i] - abs(advanced$RegretPenalty)*Regretcontin # set initial estimate of reward to go at terminal time tHoriz
+      G0base[,i] <- G0base[,i] - abs(advanced$RegretPenalty)*(RewardPIT0I - RewardI) # set initial estimate of reward to go at terminal time tHoriz
     }
 
     if(theta < 1){
@@ -123,20 +122,19 @@ DelayStageOne <- function(basic, advanced, mat){
     }
 
     G0 <- G0initcost + G0base
-    beststage1 <- apply(G0, 1, max)
     bests <- apply(G0, 1, which.max)
     bestsvec <- pmin(svec[bests] - t0, tau) # get optimal number of samples
 
     # check if taking 0 samples is optimal among policies which do not advance to Stage II.
     if(advanced$nochangeallowed){ # In stage I, no change allowed implies that stopping now before new data arrives requires that one pick the
                                   # best. One can only change if one continues to stage II.
-      beststage1 <- pmax(t(muvec)*PPMax - ICost, 0) # check if s=0 is even better than positive s in (0, tau]
-      bestsvec[beststage1 == pmax(t(muvec)*PPMax - ICost, 0)] <- 0
+      beststage1 <- pmax(muvec*PPMax - ICost, 0) # check if s=0 is even better than positive s in (0, tau]
+      bestsvec[beststage1 == pmax(muvec*PPMax - ICost, 0)] <- 0
     } else {
       # The default is advanced.nochangeallowed=false, the following code, which permits stopping
       # before stage II after a few samples have been taken, and allows one to decide which alternative is best.
-      beststage1 <- pmax(beststage1, pmax(t(muvec)*PPMax - ICost, 0)) # check if s=0 is even better than positive s in (0, tau]
-      bestsvec[beststage1 == pmax(t(muvec)*PPMax - ICost, 0)] <- 0
+      beststage1 <- pmax(beststage1, pmax(muvec*PPMax - ICost, 0)) # check if s=0 is even better than positive s in (0, tau]
+      bestsvec[beststage1 == pmax(muvec*PPMax - ICost, 0)] <- 0
     }
 
     # if optimal to continue into stage II sampling, then set optimal number of samples to tau + 1.

@@ -100,5 +100,3 @@ TerminalRegret <- function(valuevec, discountfactor, predvarsample, postvar, adv
 
   return(list(ereward = ereward, pcs = pcs))
 }
-
-

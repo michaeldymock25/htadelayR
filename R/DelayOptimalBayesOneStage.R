@@ -29,7 +29,7 @@ DelayOptimalBayesOneStage <- function(basic, advanced, tvectotest, mat){
   # Last touched: 8 Oct 2014
   # Converted to R code by Michael Dymock 2024
 
-  muvec <- t(mat$muvec)
+  muvec <- mat$muvec
   sigma <- basic$sigma
   t0 <- basic$t0
   theta <- basic$theta
@@ -60,7 +60,7 @@ DelayOptimalBayesOneStage <- function(basic, advanced, tvectotest, mat){
   }
 
   NUMCHECKS <- length(tvectotest) # number of checks for values of s in interval (0, tau]
-  svec <- t0 + t(tvectotest)      # create a row vector which will have posterior mean after all samples seen
+  svec <- t0 + tvectotest      # create a row vector which will have posterior mean after all samples seen
 
   PPatientvec <- rep(basic$PPatients, length(svec)) + (1 - advanced$fixedP)*(TMAX - svec) # number of patients to be treated following adoption
   if(min(PPatientvec) <= 0){
@@ -91,8 +91,7 @@ DelayOptimalBayesOneStage <- function(basic, advanced, tvectotest, mat){
       RewardI <- TerminalRegret(muvec*PPatientvec[i] - ICost, discountvector[i]^(1 - advanced$nochangeallowed),
                                 predvarvec[i], postvar, advanced2)$ereward
     }
-    Regretcontin <- RewardPIT0I - RewardI
-    G0base[,i] <- G0base[,i] - abs(advanced$RegretPenalty)*Regretcontin # set initial estimate of reward to go at terminal time tHoriz
+    G0base[,i] <- G0base[,i] - abs(advanced$RegretPenalty)*(RewardPIT0I - RewardI) # set initial estimate of reward to go at terminal time tHoriz
   }
 
   if(theta < 1){

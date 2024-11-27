@@ -27,33 +27,14 @@ PsiNormUV <- function(zval, dof, optionaltcdf = NULL){
   # Learning article about student distribution mill's ratio approximations.
 #
 # NOTE: THIS APPROX IS TO BE VALIDATED.
-#
-#    ZVALLIM <- 100
-#    NOMILLSRATIO <- TRUE   # for now, the Mills ratio stuff for student distribution is not debugged, so don't use it.
 
   tpdfvals <- dt(zval, dof)
-  #    zbigpos <- zval > ZVALLIM
-  #    zbigneg <- zval <= ZVALLIM
-  #    zmed <- abs(zval) <= ZVALLIM
 
-  #    if(NOMILLSRATIO){
-  #      zbigpos <- 0*zbigpos
-  #      zbigneg <- zbigpos
-  #      zmed <- rep(1, length(zmed))
-  #    }
-
-  # rbig <- zbig*tpdfvals*(1/zval - dof/((dof + 2)*zval^3))/zval # uses Mills ratio for improving stability when z is big
-  # rbig <- zbig*tpdfvals*(1/zval^2 - dof/((dof + 2)*zval^4))    # uses Mills ratio for improving stability when z is big
-  # rbigpos <- zbigpos*tpdfvals*((dof + zval^2)/(dof - 1) - zval*sqrt(1 + zval^2/dof)*(1/2 + 1/sqrt(dof))) # uses Mills ratio for improving stability when z is big
-  # rbigpos[is.na(rbigpos)] <- 0    # handle case of divide by 0 in preceding line.
-  # rbigneg <- zbigneg*(-zval + tpdfvals*((dof + zval^2)/(dof - 1) - zval*sqrt(1 + zval^2/dof)*(1/2 + 1/sqrt(dof)))) # uses Mills ratio for improving stability when z is big
-  # rbigneg[is.na(rbigneg)] <- 0    # handle case of divide by 0 in preceding line.
   if(is.null(optionaltcdf)){
-  # rmed <- zmed*((dof + zval^2)*tpdfvals/(dof - 1) - zval*pt(-zval, dof))
-  rval <- (dof + zval^2)*tpdfvals/(dof - 1) - zval*pt(-zval, dof)
+    rval <- (dof + zval^2)*tpdfvals/(dof - 1) - zval*pt(-zval, dof)
   } else {
-  # rmed <- zmed*(tpdfvals - zval*(1-  optionaltcdf))
-  rval <- tpdfvals - zval*(1 - optionaltcdf)
+    rval <- tpdfvals - zval*(1 - optionaltcdf)
   }
-  # rval <- rbigpos + zbigneg + rmed
+
+  return(rval)
 }
