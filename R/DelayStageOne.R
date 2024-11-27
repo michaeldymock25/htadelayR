@@ -122,6 +122,7 @@ DelayStageOne <- function(basic, advanced, mat){
     }
 
     G0 <- G0initcost + G0base
+    beststage1 <- apply(G0, 1, max)
     bests <- apply(G0, 1, which.max)
     bestsvec <- pmin(svec[bests] - t0, tau) # get optimal number of samples
 
